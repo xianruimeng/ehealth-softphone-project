@@ -1,13 +1,46 @@
-#summary One-sentence summary of this page.
+==Basic structure and the functionality of iPhone Application==
 
-= Introduction =
+*Doctor - Patient Communication*
 
-Add your content here.
+  *-- doctorToPatient() : 
+    	establish the communication
+  *-- patientToDoctor() : 
+	to provide the patient id to the doctor. (data type to be specified.) 
+
+*Doctor - Database Communication
+
+  *-- doctorToDB( id, … ): 
+		to query the relevant medical records and information
+  *-- getRecords():
+		To return the data to the expert system.
+
+"For the code that deal with the communication, mark with comments so that the code may be changed in the future. Specifically that a layer of encryption may be added to the communication."
+
+iPhone Application (Doctor interface with incorporated expert system)
+
+-has internal expert system (subclass of NSObject) (try and develop universal header file, which models can be switched out easily)
+-has a list of data, with several patient identifiers grouped by patient, probably stored in CoreData for persistence (check to see if CoreData can support encryption of contents)
+https://nickharris.wordpress.com/2010/07/14/core-data-and-enterprise-iphone-applications-protecting-your-data/
+-
 
 
-= Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+
+Possible future developments
+- communications with the nurses station to convey orders dealing with the complications
+-develop a generic expert system (from existing literature)
+
+
+
+For now:
+-database is text file hosted on some website
+-patient is a module that will return a random patient from the list of existing patients
+-expert system will be a toy example. 
+	input - patient id/patient information, (list of complications?, complications/patient info rules?) (generic expert system model, or specific)
+	outputs
+
+-doctor will click on a patient in a tableview (or a button to add a patient), which will bring up the expected complications, and clicking on those will bring up a list of treatments. 
+
+Questions to ask system administrator:
+
+1. 
