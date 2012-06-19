@@ -1,5 +1,7 @@
 ==Basic structure and the functionality of iPhone Application==
 
+*Leave the Patient Side as just a Senor for now *
+
 *Doctor - Patient Communication*
 
   *-- doctorToPatient() : establish the communication
