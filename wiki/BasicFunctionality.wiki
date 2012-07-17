@@ -17,3 +17,8 @@
    (Temporary expert system in the doctor's app)
   * getData(): Get the data from the DB
   * forwardDoctor(): Give the risk and decision making the doctor
+
+*The privacy and security on Database*
+
+ *Privacy and Integrity 
+ *Security on data retrieval 
