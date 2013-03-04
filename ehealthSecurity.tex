@@ -1,0 +1,145 @@
+\documentclass[11pt]{article}
+
+\usepackage{geometry}  % [top=2cm, bottom=2cm, left=2cm, right=2cm]
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+\usepackage[parfill]{parskip}    
+\usepackage{graphicx}
+\usepackage{amssymb, amsmath, amsthm, amsfonts}
+\usepackage{enumerate}
+\usepackage{hyperref}
+
+\newcommand{\class}[1]{{\ensuremath{\mathsf{#1}}}}
+\newcommand{\gen}{\class{Gen}}
+\newcommand{\enc}{\class{Enc}}
+\newcommand{\dec}{\class{Dec}}
+\newcommand{\zo}{\{0, 1\}}
+\newcommand{\dist}[2]{\class{dist}(\ensuremath{{#1}},\ensuremath{{#2}})}
+\newcommand{\id}{\class{id}}
+\newcommand{\K}{\mathcal{K}}
+\newcommand{\mac}{\class{MAC}}
+\newcommand{\pk}{\class{pk}}
+\newcommand{\sk}{\class{sk}}
+\usepackage{color}
+
+\def\marginnotes{1}
+
+\ifnum\marginnotes=0
+\newcommand{\xnote}[1]{}
+\newcommand{\snote}[1]{}
+\newcommand{\tnote}[1]{}
+\else
+\newcommand{\xnote}[1]{\marginpar{\textcolor{red}{\textbf{!!!}}}\textcolor{blue}{\sf #1 --X.M.}}
+\newcommand{\snote}[1]{\marginpar{\textcolor{red}{\textbf{!!!}}}\textcolor{blue}{\sf #1 --S.H.}}
+\newcommand{\tnote}[1]{\marginpar{\textcolor{red}{\textbf{!!!}}}\textcolor{blue}{\sf #1 --T.Z.}}
+\fi
+
+
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{descript}[theorem]{Description}
+
+\title{\textbf{Security and Privacy Aspects of Mobile Applications for Post-Surgical Care}}
+\author{Xianrui Meng}
+\date{}
+
+\begin{document}
+\maketitle
+%\begin{abstract}
+%\ldots to be filled \ldots
+%\end{abstract}
+\section{Introduction}
+The security model for electronic health records is needed for current hospital health system. As the mobile-phone become the main communication tool for the doctors and the patients, a secure and privacy-preserved model/framework is required for such a mobile system.
+
+Consider the following scenario: suppose doctor Alice wants to check all types of complications for her patient Bob from hospital's database, she must inquiry all necessary fields and information to pass them to an existing ``expert system'', which will compute all related complications. 
+The doctor Alice, on the other hand, will make a judgment to the complications and she will also be able to update relevant decision to Bob's medical record in the hospital's database.
+Due to the sensitivity of the health records, data sharing and third party computation require confidentiality and privacy.
+
+\section{The description of our system}
+\subsection{The environment}
+Although the potential benefits of the `eHealth' softphone, including better post-surgery service, time saving, efficient communication, and reduced cost, however, the system arises many privacy and security challenges. Before we address the security model and privacy issues, we first will show some assumption for the  environment: 1). The central database system must be maintained by the hospital, namely, we may not use some other service from a third party since it may deal with the trustworthyness and privacy-preserving problems. 2). The wireless communication between the mobile device will totally unprotected. Thus, we must consider the `man-in-the-middle' attack for our system. 
+%3). (\xnote{what's more? what's missing here?})
+
+\subsection{The Protocol}
+To enable the system provide the confidential and integrated data to the doctor, our system must avoid the exposure of the data to other unauthorized party while protecting the data from tampering. On the other hand, we also need to minimize communication overhead and the computation on both server and client.
+
+We need the doctor to initiate a secure channel to the hospital's DB. Canetti and Krawczyk \cite{DBLP:conf/eurocrypt/CanettiK01} showed how to build a secure channel. Specifically,
+\begin{theorem}
+If $\enc$ is a symmetric encryption scheme secure in the sense of IND-CPA and MAC is a secure MAC family then method EtA(ENC, MAC) implements secure channels.
+\end{theorem}
+Assume that the symmetric encryption scheme $(\enc, \dec)$ is IND-CPA secure, the asymmetric encryption scheme $(\enc', \dec')$ is IND-CCA secure.
+
+\textbf{Description of the protocol}
+\begin{enumerate}
+\item Doctor Alice will first initialize the protocol by getting the patients $\id$ from the patient sensor (e.g. scanning the a barcode using the iPhone or some other mobile device). We assume this phase is the face-to-face communication, thus no attacker can `steal' the $\id$ at this time. The stored $\id$ in Alice's mobile phone for future inquiry. We denote the patient's id to be $c_\id$. 
+
+\item Alice will first initiate with `handshake' with the DB, moreover, mutual authentication and key exchange will be done between Alice and the central DB. We use the Key Exchange (Sigma-KE) protocol to derive some session keys, which implicitly achieve the mutual authentication. More specifically, let the $x$ and $y$ denote the randomness generated by Alice and DB, and let $s = session_{\id}$.
+(Sigma-KE protocol)\\
+Message 1 $(Alice \to DB)$ : $s, g^x$\\
+Message 2 $(Alice \leftarrow DB) : s, g^y, id_{DB}, MAC_{\K_1}(s, id_{DB}), SIG_{DB}(s, g^x, g^y)$\\
+Message 3 $(Alice \to DB) : s, id_{Alice}, MAC_{\K_1}(s, id_{Alice} , g^x), SIG_{Alice} (s, g^y, g^x)$\\
+
+Both Alice and DB will generate some session keys using the shared seed $(g^{xy})$. This is could be done using the PRF, i.e. $f_{g^{xy}}(0), f_{g^{xy}}(1), ...$, etc. The input for the PRFs can be the $\id$ with different padding.
+
+\item Alice will produce a triple $(x, y, z)$ where $x = \enc'_{\pk}(alice_\id, session_\id)$, $y = \enc_{\K_e}(c_\id)$, $z = \mac_{\K_a}(alice_\id, y)$. On receiving the message $(x', y', z')$, the server DB will have a function verifies the uniqueness of message `identifier' $\dec'_\sk(x')$ and the validity of the $\mac$ tag (computed on ($x, y$));  if the checks success $y'$ is decrypted under key $\K_e$ and the resultant plaintext accepted as a valid query $c_\id$.
+
+\xnote{As addressed  in \cite{BonehCOP04} (used Public key encryption) or \cite{SongWP00} (Symmetric Key Encryption), to protect the search query from Alice, we may consider, in the future, to hide the query $c_\id$.}
+
+%\item Before Alice access the DB, DB should verify the one who wants to acquire the data is indeed Alice. Therefore, DB should authenticate the source of the query from the doctor. \cite{DBLP:dblp_conf/codaspy/KunduAB12} and \cite{DBLP:dblp_journals/pvldb/KunduB08} mentioned the leakage-free signature structures that may be used here.
+
+%\item To get access to the patient's medical records in the hospital's database, Alice will transmitted the encrypted $c_\id$ to inquiry the relevant data fields from the database. As addressed  in \cite{BonehCOP04} (used Public key encryption) or \cite{SongWP00} (Symmetric Key Encryption), to protect the search query from Alice, we need to hide the query $\id$. %\xnote{What particular scheme do we want}. 
+
+\item Upon receiving the decrypted the query, DB should be able to return the necessary fields to the doctor using the some key derived from the KE phase, and thus initiate another talk to the client(Alice). Also, the protocol may be use some digital signature to verify the integrity of the content, i.e. $SIG_{\class{SK}}(m)$, where $m$ is the messages that have been sent.
+
+\item After all the necessary fields passed to the mobile device to the doctor side, the ``expert system'' will then compute the likelihood of the relevant complication for this patient. Alice, at this point, should be able to make a decision or a treatment to Bob. Moreover, the new decision/treatment will then send back to the corresponding medical record to hospital's DB. Relevant content written up to the DB will be encrypted using the previous key (from KE phase); also a signature will be appended to this decision for the BD's verification. 
+\end{enumerate}
+
+\subsection{Threat model and the security of the protocol}
+The adversary want 
+Goal: adversary learns no new info about a patient's medical record from a single 
+The general strategy for the attacker will be to acquire the sensitive information from this whole communication between Alice and DB.
+
+Possible threat model:
+\begin{itemize}
+\item Adversary tries to fake Alice. (KE authentication)
+\item Adversary tries to be the central DB. (KE authentication)
+\item Adversary tries to be the eavesdropper to steal the sensitive information. (Cipher)
+\end{itemize}
+
+
+\section{To embedded the ABE to our system}
+\paragraph{Encryption process:} When a record is created, each node within the record is evaluated by a policy
+engine, which determines whether encryption is necessary, and derives a policy and a set of attribute tags
+that are appropriate for the record. The operation of the policy engine is flexible, and can be configured according to institutional requirements (we describe our implementation below). If the record
+is marked for encryption, it can be encrypted using ciphertext-policy ABE or encrypted using a key-policy ABE scheme under a set of attributes identified by the policy engine (these may include record type, patient age, date, and other non-sensitive attributes related to the record).
+
+\paragraph{Granting Access:} Patients and authorized health care providers obtain one of two types of keys from
+the hospital's ABE master controller. Ciphertext-policy or role keys embedded attributes related to the user e.g., patient name, user type (physician, patient, insurance agent), department, age, and key expiration date. These are used for individuals whose access privileges change infrequently. However, it may be desirable to grant other parties such as temporary contractors and researchers a limited access to
+the health database. These individuals can be supported using the key-policy system: individual content keys will then specify a particular policy defining which records the key can access, e.g., access to all cardiac-related labs for patients aged 42 and above."
+
+\newpage
+\section{Implementation}
+\textbf{Data Structure}
+
+\emph{PatientCoreData}: PatientCoreData class is used to hold the data. When a patient data has been `scanned' to the phone, we convert this data entry into the PatientCoreData type on the phone.
+
+\emph{ExpertSystem}: The patient data will then be passed to the expert system. The `expert system' will calculate the post-surgical risk level for the patient. Currently, the \emph{dvtRiskCalculator} maintains a sample complication calculation for Deep Vein Thrombosis. Its identifiers are Age, Gender, BMI, Walking, Congestive Heart Failure. Risk Levels are Low, Medium, High.
+
+\textbf{Views}
+
+\emph{ComplicationTVC}:
+Displays the patient's complications as calculated by the expert system. Each complication is represented by one cell. It controls one of the views of the tab controller segued from PatientTableViewController. The controller initiates the segue to TreatmentTVC view
+
+\emph{PatientInformationTVC}:
+Displays the patient information as queried from the database where dictionary keys are table section headers and the object for the key is displayed in the cell. It controls one of the views of the tab controller segued from PatientTableViewController. The controller does not initiate any segues.
+
+\emph{PatientTableViewController}:
+Controller for view that displays the listing of patients stored in coredata. Subclass of CoreDataTableViewController which controls much of the interaction with the coreData model. Also implements editing and adding of patients to the database. This controller contains the ExpertSystem model by which patients are initialized. Main view of the application and segues to the tab view (no explicit controller) which contains PatientInformationTVC and ComplicationTVC
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{crypto}
+\end{document}
